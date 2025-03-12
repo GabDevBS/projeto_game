@@ -1,29 +1,27 @@
 const canvas = document.getElementById('jogo2D');
 const ctx = canvas.getContext('2d');
-function colisao(){
-    if(
+function colisao() {
+    if (
         personagem.x < obstaculo.x + obstaculo.largura &&
         personagem.x + personagem.width > obstaculo.x &&
         personagem.y < obstaculo.y + obstaculo.altura &&
         personagem.y + personagem.height > obstaculo.y
-    ){
+    ) {
         alert("Game Over!")
         cancelAnimationFrame(loop)
     }
 }
 document.addEventListener('keydown', (e) => {
-    if(e.code == 'Space' && personagem.pulo == false) {
-        console.log("Press the Space Bar")
-        personagem.velocidadeY = 20
-        personagem.pulo = true
+    if (e.code == 'Space' && personagem.jump == false) {
+        personagem.saltar()
     }
 })
 
 
 
-class Entidade{
+class Entidade {
     #gravidade
-    constructor(posX, posY, largura, altura){
+    constructor(posX, posY, largura, altura) {
         this.posX = posX
         this.posY = posY
         this.largura = largura
@@ -33,21 +31,50 @@ class Entidade{
     get gravidade() {
         return this.#gravidade
     }
-
-    desenhar = function(cor){
+    desenhar(cor) {
         ctx.fillstyle = cor
         ctx.fillRect(this.posX, this.posY, this.largura, this.altura)
+
+    }
+
+
+}
+
+class Personagem extends Entidade {
+    #velocidadeY
+    #jump
+    constructor(posX, posY, largura, altura) {
+        super(posX, posY, largura, altura)
+        this.#jump = false
+        this.#velocidadeY = 0
+    }
+    saltar() {
+        console.log("Press the Space Bar")
+        personagem.#velocidadeY = 20
+        personagem.#jump = true
+    }
+    get jump() {
+        return this.#jump
+    }
+    atualizarPersonagem() {
+        if (this.#jump == true) {
+            this.posY -= this.#velocidadeY;
+            this.#velocidadeY -= this.gravidade
+            if (this.posY >= canvas.height - 50) {
+                this.#velocidadeY = 0
+                this.#jump = false
+                this.posY = canvas.height - 50
+            }
+        }
     }
 }
 
-class Personagem extends Entidade{
-    constructor(posX, posY, largura, altura, velocidadeX, velocidadeY){
-        super(posX, posY, largura, altura) 
-    }
-}
 
-class Obstaculo extends Entidade{
-    constructor(posX, posY, largura, altura, velocidadeX){
+
+
+
+class Obstaculo extends Entidade {
+    constructor(posX, posY, largura, altura, velocidadeX) {
         super(posX, posY, largura, altura)
     }
 }
@@ -61,9 +88,10 @@ const personagem = new Personagem(
     0
 )
 
-function loop(){
-    ctx.clearRect(0,0,canvas.width,canvas.height)
+function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     personagem.desenhar('black')
+    personagem.atualizarPersonagem()
     requestAnimationFrame(loop)
 }
 loop()
